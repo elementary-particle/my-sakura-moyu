@@ -1,0 +1,30 @@
+#include <winver.h>
+
+VS_VERSION_INFO VERSIONINFO
+  FILEVERSION    1,1,1,0
+  PRODUCTVERSION 1,1,1,0
+  FILEFLAGS      0x0
+  FILEFLAGSMASK  0x3F
+  FILEOS         VOS_NT_WINDOWS32
+  FILETYPE       VFT_DLL
+  FILESUBTYPE    VFT2_UNKNOWN
+  BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+      BLOCK "080404b0"
+      BEGIN
+        VALUE "CompanyName", "SakuraMoyu Translation Team"
+        VALUE "FileDescription", "SakuraMoyu Chinese Simplified Patch Library"
+        VALUE "FileVersion", "1.1.1"
+        VALUE "InternalName", "MoyuPatch"
+        VALUE "LegalCopyright", "Copyright (C) 2022, Team Moyu"
+        VALUE "OriginalFilename", "filter.dll"
+        VALUE "ProductName", "SakuraMoyu Chinese Simplified Patch"
+        VALUE "ProductVersion", "1.1.1"
+      END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+      VALUE "Translation", 0x804, 1200
+    END
+  END

@@ -1,0 +1,29 @@
+./configure \
+  --extra-version=vsfiltermod \
+  --prefix=/usr/local \
+  --pkg-config-flags=--static \
+  --disable-debug \
+  --enable-gpl --enable-version3 \
+  --disable-w32threads --disable-autodetect \
+  --enable-ffmpeg \
+  --disable-doc \
+  --disable-htmlpages \
+  --disable-podpages \
+  --disable-txtpages \
+  --disable-manpages \
+  \
+  --disable-everything \
+  --enable-encoder=wmv2 \
+  --enable-decoder=wmv2 \
+  \
+  --enable-muxer=asf \
+  --enable-demuxer=asf \
+  \
+  --enable-libass \
+  --enable-protocol=file \
+  --enable-filter=ass \
+  \
+  --enable-static \
+  --disable-shared \
+  \
+  --extra-ldflags='-static -static-libgcc' --extra-libs=-lc++
