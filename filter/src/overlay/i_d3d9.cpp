@@ -1,11 +1,14 @@
 #include "overlay/i_d3d9.h"
 
+ID3DApp GameApp;
 PFUNC_Direct3DCreate9 pDirect3DCreate9;
 IDirect3D9 *WINAPI OverlayD3DCreate(UINT SDKVersion) {
   IDirect3D9 *iD3D;
   iD3D = (*pDirect3DCreate9)(SDKVersion);
   if (iD3D) {
-    return new IOverlayD3D(iD3D);
+    auto *iNewD3D = new IOverlayD3D(iD3D);
+    GameApp.AddD3D(iNewD3D);
+    return iNewD3D;
   } else {
     return NULL;
   }
@@ -25,6 +28,11 @@ ULONG IOverlayD3D::Release() {
   ULONG count;
   count = iD3D->Release();
   if (count == 0) {
+    *piPrevD3D = iNextD3D;
+    if (iNextD3D) {
+      iNextD3D->piPrevD3D = piPrevD3D;
+      iNextD3D = NULL;
+    }
     delete this;
   }
   return count;
@@ -91,6 +99,11 @@ HRESULT IOverlayD3D::GetDeviceCaps(UINT Adapter, D3DDEVTYPE DeviceType,
 HMONITOR IOverlayD3D::GetAdapterMonitor(UINT Adapter) {
   return iD3D->GetAdapterMonitor(Adapter);
 }
+void IOverlayD3D::AddDevice(IOverlayDevice *iDevice) {
+  iDevice->piPrevDevice = &pDeviceList;
+  iDevice->iNextDevice = pDeviceList;
+  pDeviceList = iDevice;
+}
 /** Hooked **/
 HRESULT IOverlayD3D::CreateDevice(
     UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags,
@@ -102,8 +115,20 @@ HRESULT IOverlayD3D::CreateDevice(
       D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED,
       pPresentationParameters, ppReturnedDeviceInterface);
   if (SUCCEEDED(hResult)) {
-    *ppReturnedDeviceInterface = iSakuraDevice = new IOverlayDevice(
+    auto *iNewDevice = new IOverlayDevice(
         this, *ppReturnedDeviceInterface, pPresentationParameters, TRUE);
+    AddDevice(iNewDevice);
+    *ppReturnedDeviceInterface = iNewDevice;
+  } else {
+    hResult =
+        iD3D->CreateDevice(Adapter, DeviceType, hFocusWindow, BehaviorFlags,
+                           pPresentationParameters, ppReturnedDeviceInterface);
+    if (SUCCEEDED(hResult)) {
+      auto *iNewDevice = new IOverlayDevice(
+          this, *ppReturnedDeviceInterface, pPresentationParameters, TRUE);
+      AddDevice(iNewDevice);
+      *ppReturnedDeviceInterface = iNewDevice;
+    }
   }
   return hResult;
 }

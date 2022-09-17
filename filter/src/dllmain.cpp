@@ -249,23 +249,21 @@ void SakuraApp::SysMovie(VMARG *Arg) {
   pMoviePath = GetStringArg(Arg);
   // DebugLog(0, "Movie Load: %s\n", pMoviePath);
   (this->*pSysMovie)(Arg);
-  if (iSakuraDevice && pMoviePath) {
+  if (pMoviePath) {
     PCSTR pAssSubPath;
     if (!strcmp(pMoviePath, "movie/01.wmv")) {
       pAssSubPath = PATH_SUB VD1_NAME;
-      iSakuraDevice->AttachSub(new Subtitle((char *)pAssSubPath));
+      GameApp.AttachSub(new Subtitle((char *)pAssSubPath));
     } else if (!strcmp(pMoviePath, "movie/02.wmv")) {
       pAssSubPath = PATH_SUB VD2_NAME;
-      iSakuraDevice->AttachSub(new Subtitle((char *)pAssSubPath));
+      GameApp.AttachSub(new Subtitle((char *)pAssSubPath));
     }
   }
 }
 void SakuraApp::SysMovieStop(VMARG *Arg) {
   // DebugLog(0, "Movie Stop\n");
   (this->*pSysMovieStop)(Arg);
-  if (iSakuraDevice) {
-    iSakuraDevice->DetachSub();
-  }
+  GameApp.DetachSub();
 }
 void SakuraApp::AudioLoad(VMARG *Arg) {
   PCSTR pAudioPath;
@@ -273,7 +271,7 @@ void SakuraApp::AudioLoad(VMARG *Arg) {
   if (Arg->bType == 2 && 0 <= Arg->dwData && Arg->dwData < 4) {
     pAudioPath = GetStringArg(Arg + 1);
     // DebugLog(0, "Audio Load: %d %s\n", Arg->dwData, pAudioPath);
-    if (iSakuraDevice && pAudioPath) {
+    if (pAudioPath) {
       if (!strcmp(pAudioPath, "BGM/073")) {  // ED1
         AudioSub[Arg->dwData] = PATH_SUB ED1_NAME;
       } else if (!strcmp(pAudioPath, "BGM/074")) {  // ED2
@@ -286,20 +284,20 @@ void SakuraApp::AudioLoad(VMARG *Arg) {
 }
 void SakuraApp::AudioPlay(VMARG *Arg) {
   (this->*pAudioPlay)(Arg);
-  if (0 <= Arg->dwData && Arg->dwData < 4 && iSakuraDevice) {
+  if (0 <= Arg->dwData && Arg->dwData < 4) {
     // DebugLog(0, "Audio Play: %d\n", Arg->dwData);
     if (AudioSub[Arg->dwData]) {
       dwAudioSubChannel = Arg->dwData;
-      iSakuraDevice->AttachSub(new Subtitle((char *)AudioSub[Arg->dwData]));
+      GameApp.AttachSub(new Subtitle((char *)AudioSub[Arg->dwData]));
     }
   }
 }
 void SakuraApp::AudioStop(VMARG *Arg) {
   (this->*pAudioStop)(Arg);
-  if (0 <= Arg->dwData && Arg->dwData < 4 && iSakuraDevice) {
+  if (0 <= Arg->dwData && Arg->dwData < 4) {
     // DebugLog(0, "Audio Stop: %d\n", Arg->dwData);
     if (AudioSub[Arg->dwData] && Arg->dwData == dwAudioSubChannel) {
-      iSakuraDevice->DetachSub();
+      GameApp.DetachSub();
       dwAudioSubChannel = 4;
     }
   }
@@ -324,7 +322,6 @@ HMODULE hSakuraExe;
 BOOL doTextPatch, doImagePatch, doSubPatch;
 CHAR lpDllPath[NAME_SIZE];
 HMODULE hDirect3D9Library;
-IOverlayDevice *iSakuraDevice;
 
 /** Global Functions **/
 typedef int(WINAPI *PFUNC_MessageBoxA)(HWND hWnd, LPCSTR lpText,
@@ -569,7 +566,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ulReason, LPVOID lpReserved) {
         hDirect3D9Library = NULL;
         pDirect3DCreate9 = NULL;
       }
-      iSakuraDevice = NULL;
       SubtitleInit();
       InitGlobal();
 
