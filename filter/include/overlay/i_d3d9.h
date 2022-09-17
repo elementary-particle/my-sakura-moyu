@@ -22,6 +22,8 @@ extern PFUNC_Direct3DCreate9 pDirect3DCreate9;
 IDirect3D9 *WINAPI OverlayD3DCreate(UINT SDKVersion);
 
 class IOverlayD3D;
+class ID3DApp;
+extern ID3DApp GameApp;
 
 class IOverlayDevice : public IDirect3DDevice9 {
  private:
@@ -67,6 +69,7 @@ class IOverlayDevice : public IDirect3DDevice9 {
     }
   };
   static const SIZE_T CHAIN_SIZE = 4;
+  IOverlayDevice **piPrevDevice, *iNextDevice;
   BOOL bUseSoftBlend;
   HANDLE hFinishEvent;
   FRAMEDATA Frame[CHAIN_SIZE];
@@ -305,10 +308,25 @@ class IOverlayDevice : public IDirect3DDevice9 {
 class IOverlayD3D : public IDirect3D9 {
  private:
   IDirect3D9 *iD3D;
+  void AddDevice(IOverlayDevice *iDevice);
 
  public:
-  IOverlayD3D(IDirect3D9 *_iD3D) : iD3D(_iD3D) {}
+  IOverlayD3D **piPrevD3D, *iNextD3D;
+  IOverlayDevice *pDeviceList;
+  IOverlayD3D(IDirect3D9 *_iD3D) : iD3D(_iD3D), pDeviceList(NULL) {}
   IDirect3D9 *GetDirect3D() const { return iD3D; }
+  void AttachSub(Subtitle *pSub) {
+    IOverlayDevice *iDevice;
+    for (iDevice = pDeviceList; iDevice; iDevice = iDevice->iNextDevice) {
+      iDevice->AttachSub(pSub);
+    }
+  }
+  void DetachSub() {
+    IOverlayDevice *iDevice;
+    for (iDevice = pDeviceList; iDevice; iDevice = iDevice->iNextDevice) {
+      iDevice->DetachSub();
+    }
+  }
 
   /* IUnknown methods */
   STDMETHOD(QueryInterface)(THIS_ REFIID riid, void **ppvObj);
@@ -348,6 +366,27 @@ class IOverlayD3D : public IDirect3D9 {
    IDirect3DDevice9 **ppReturnedDeviceInterface);
 };
 
-extern IOverlayDevice *iSakuraDevice;
+class ID3DApp {
+ public:
+  IOverlayD3D *pD3DList;
+  ID3DApp() noexcept : pD3DList(NULL) {}
+  void AddD3D(IOverlayD3D *iD3D) {
+    iD3D->piPrevD3D = &pD3DList;
+    iD3D->iNextD3D = pD3DList;
+    pD3DList = iD3D;
+  };
+  void AttachSub(Subtitle *pSub) {
+    IOverlayD3D *iD3D;
+    for (iD3D = pD3DList; iD3D; iD3D = iD3D->iNextD3D) {
+      iD3D->AttachSub(pSub);
+    }
+  }
+  void DetachSub() {
+    IOverlayD3D *iD3D;
+    for (iD3D = pD3DList; iD3D; iD3D = iD3D->iNextD3D) {
+      iD3D->DetachSub();
+    }
+  }
+};
 
 #endif  // FILTER_I_D3D9_H
