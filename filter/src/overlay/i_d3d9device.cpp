@@ -495,6 +495,11 @@ ULONG IOverlayDevice::Release() {
   ULONG count;
   count = iDevice->Release();
   if (count == 0) {
+    *piPrevDevice = iNextDevice;
+    if (iNextDevice) {
+      iNextDevice->piPrevDevice = piPrevDevice;
+      iNextDevice = NULL;
+    }
     delete this;
   }
   return count;
