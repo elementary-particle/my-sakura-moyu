@@ -1,31 +1,5 @@
 <template>
   <div class="app-window mdui-container-fluid" style="width: 100%;" v-if="!hasConflict">
-    <!--
-    <table>
-      <tr>
-        <td>项目</td>
-        <td><select class="mdui-select" v-model="projectName" v-on:change="onChangeProject">
-          <option v-for="projectName in projectList" :key="projectName">
-            {{ projectName }}
-          </option>
-        </select></td>
-        <td>编号范围</td>
-        <td><input class="options" style="width: 5em" type="number"
-                   v-on:change="constraintRange" v-model="unitRangeStart"></td>
-        
-        <td>到</td>
-        <td><input class="options" style="width: 5em" type="number"
-                   v-on:change="constraintRange" v-model="unitRangeEnd"></td>
-        
-        <td>显示范围</td>
-        <td><input class="options" style="width: 5em" type="number"
-                   v-on:change="updateView" v-model="viewRangeStart"></td>
-        <td>长度</td>
-        <td><input class="options" style="width: 5em" type="number"
-                   v-on:change="updateView" v-model="viewRangeLength"></td>
-      </tr>
-    </table>
-    -->
     <div class="mdui-drawer" id="drawer">
       <ul class="mdui-list" mdui-collapse="{accordion: true}" style="max-width: 360px;">
           <!--
@@ -57,16 +31,6 @@
     </div>
     <div class="mdui-container">
       <div class="mdui-row mdui-row-gapless">
-        <!--
-        <div class="mdui-textfield mdui-col-xs-2 mdui-valign">
-          <label class="mdui-textfield-label mdui-text-right">项目</label>
-          <select class="mdui-select" v-model="projectName" v-on:change="onChangeProject" id="projectSelector">
-            <option v-for="projectName in projectList" :key="projectName">
-              {{ projectName }}
-            </option>
-          </select>
-        </div>
-        -->
         <div class="mdui-textfield mdui-col-xs-2 mdui-valign">
           <label class="mdui-textfield-label mdui-text-right">起始位置</label>
           <input class="mdui-textfield-input mdui-text-center" type="number"
@@ -186,7 +150,7 @@ export default {
     viewUnitList: [],
   }),
   mounted() {
-    this.tcClient = new TCClient("http://127.0.0.1:8000/api");
+    this.tcClient = new TCClient("/api");
     this.tcClient.getProjectList().then(
         (list) => {
           if (list) {
