@@ -1,40 +1,92 @@
 <template>
-  <div class="app-window" style="width: 100%;" v-if="!hasConflict">
-    <table>
-      <tr>
-        <td>项目</td>
-        <td><select class="options" v-model="projectName" v-on:change="onChangeProject">
-          <option v-for="projectName in projectList" :key="projectName">
-            {{ projectName }}
-          </option>
-        </select></td>
-        <td>编号范围</td>
-        <td><input class="options" style="width: 5em" type="number"
-                   v-on:change="constraintRange" v-model="unitRangeStart"></td>
-        <td>到</td>
-        <td><input class="options" style="width: 5em" type="number"
-                   v-on:change="constraintRange" v-model="unitRangeEnd"></td>
-        <td>显示范围</td>
-        <td><input class="options" style="width: 5em" type="number"
-                   v-on:change="updateView" v-model="viewRangeStart"></td>
-        <td>长度</td>
-        <td><input class="options" style="width: 5em" type="number"
-                   v-on:change="updateView" v-model="viewRangeLength"></td>
-      </tr>
-    </table>
-    <table>
-      <tr>
-        <td>工作表</td>
-        <td><input class="options" type="file" v-on:change="onChangeBook($event)"></td>
-      </tr>
-    </table>
-    <div style="width: inherit;">
-      <input class="control" type="button" value="拉取" v-on:click="onPull">
-      <input class="control" type="button" value="推送" v-on:click="onTryPush">
-      <input class="control" type="button" value="导入" v-on:click="loadBook">
-      <input class="control" type="button" value="导出" v-on:click="saveBook">
+  <div class="app-window mdui-container-fluid" style="width: 100%;" v-if="!hasConflict">
+    <div class="mdui-drawer" id="drawer">
+      <ul class="mdui-list" mdui-collapse="{accordion: true}" style="max-width: 360px;">
+          <!--
+          <a class="mdui-list-item mdui-ripple mdui-text-color-theme">
+            <div class="mdui-list-item-content">首页</div>
+          </a>
+          -->
+          <div class="mdui-collapse-item mdui-collapse-item-open">
+            <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
+              <div class="mdui-list-item-content">项目列表</div>
+              <i class="mdui-collapse-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
+            </div>
+            <div class="mdui-collapse-item-body mdui-list">
+              <button class="mdui-btn mdui-btn-block mdui-list-item mdui-ripple" 
+                        v-on:click="onChangeProject(projectName)" v-for="projectName in projectList" :key="projectName">
+                {{ projectName }}
+              </button>
+            </div>
+          </div>
+      </ul>
+  </div>
+    <div class="mdui-appbar mdui-appbar-fixed">
+      <div class="mdui-toolbar mdui-color-indigo">
+        <a class="mdui-btn mdui-btn-icon" mdui-drawer="{target: '#drawer'}">
+        <i class="mdui-icon material-icons"></i></a>
+        <span class="mdui-typo-title">在线翻译平台</span>
+        <div class="mdui-toolbar-spacer"></div>
+      </div>
     </div>
+    <div class="mdui-container">
+      <div class="mdui-row mdui-row-gapless">
+        <div class="mdui-textfield mdui-col-xs-2 mdui-valign">
+          <label class="mdui-textfield-label mdui-text-right">起始位置</label>
+          <input class="mdui-textfield-input mdui-text-center" type="number"
+                  v-on:change="constraintRange" v-model="unitRangeStart"/>
+        </div>
+        <div class="mdui-textfield mdui-col-xs-2 mdui-valign">
+          <label class="mdui-textfield-label mdui-text-right">终止位置</label>
+          <input class="mdui-textfield-input mdui-text-center" type="number"
+                  v-on:change="constraintRange" v-model="unitRangeEnd"/>
+        </div>
+        <div class="mdui-textfield mdui-col-xs-2 mdui-valign">
+          <label class="mdui-textfield-label mdui-text-right">步长</label>
+          <input class="mdui-textfield-input mdui-text-center" type="number"
+                  v-on:change="constraintRange" v-model="viewRangeLength"/>
+        </div>
+        <div class="mdui-textfield mdui-col-xs-6 mdui-valign">
+          <label class="mdui-textfield-label mdui-text-right">上传工作表</label>
+          <input class="mdui-btn mdui-btn-raised mdui-ripple" type="file" v-on:change="onChangeBook($event)">
+        </div>
+      </div>
+    </div>
+    <div class="mdui-container">
+      <div class="mdui-row mdui-valign">
+        <div class="mdui-col-xs-3">
+          <button class="button mdui-btn mdui-btn-raised mdui-ripple" v-on:click="prevPage">上一页</button>
+        </div>
+        <div class="mdui-textfield mdui-valign mdui-col-xs-2">
+          <label class="mdui-textfield-label mdui-text-right">表头编号</label>
+          <input class="mdui-textfield-input mdui-text-center" type="number"
+                  v-on:change="constraintRange" v-model="viewRangeStart"/>
+        </div>
+        <div class="mdui-col-xs-4">
+          <button class="button mdui-btn mdui-btn-raised mdui-ripple" v-on:click="turnTo">转到</button>
+        </div>
+        <div class="mdui-col-xs-3">
+          <button class="button mdui-btn mdui-btn-raised mdui-ripple" v-on:click="nextPage">下一页</button>
+        </div>
+      </div>
+    </div>
+    <div class="mdui-container">
+      <div style="width: inherit;">
+        <button class="button mdui-btn mdui-btn-raised mdui-ripple" v-on:click="onPull">拉取</button>
+        <button class="button mdui-btn mdui-btn-raised mdui-ripple" v-on:click="onTryPush">推送</button>
+        <button class="button mdui-btn mdui-btn-raised mdui-ripple" v-on:click="loadBook">导入</button>
+        <button class="button mdui-btn mdui-btn-raised mdui-ripple" v-on:click="saveBook">导出</button>
+      </div>
+    </div>
+    <hr/>
     <unit-list v-bind:unit-pair-list="viewUnitList"></unit-list>
+    <hr/>
+    <div class="mdui-bottom-nav mdui-color-theme">
+      <div class="footer-nav-text">
+        <span class="footer-nav-direction">Powered By MoeTrans</span>
+      </div>
+    </div>
+
   </div>
   <div style="width: 100%" v-if="hasConflict">
     <div>远程与本地的修改出现了冲突，请在下列表格的“本地”行中输入合并方案。</div>
@@ -52,6 +104,7 @@ import {TCClient} from "@/tcclient";
 import {diffUnit} from "@/version";
 import UnitList from "@/components/UnitList";
 import MergeBox from "@/components/MergeBox";
+import mdui from "mdui";
 
 function storageAvailable(type) {
   let storage;
@@ -127,7 +180,7 @@ export default {
   },
   methods: {
     showError(message) {
-      alert(message);
+      mdui.alert(message);
     },
     constraintRange() {
       if (this.unitRangeStart < 1) {
@@ -140,16 +193,30 @@ export default {
     onChangeBook($event) {
       this.bookFile = $event.target.files[0];
     },
-    onChangeProject() {
+    onChangeProject(...arg) {
       this.conflictList = [];
       this.hasConflict = false;
       this.waitPush = false;
       this.unitIndex = {};
+      if (arg != null) {
+        if (arg[0] == this.projectName) {
+          return;
+        }
+        this.projectName = arg[0];
+      }
       this.tcClient.getRange(this.projectName).then(
           (range) => {
             if (range) {
               this.unitRangeStart = range.min;
               this.unitRangeEnd = range.max;
+              if (this.unitRangeStart != null && this.unitRangeEnd != null) {
+                this.viewRangeLength = 10;
+              }
+              else {
+                this.unitRangeStart = 1;
+                this.unitRangeEnd = 1;
+                this.viewRangeLength = 1;
+              }
               this.updateView();
               this.onPull();
             }
@@ -169,71 +236,65 @@ export default {
     onPull() {
       const vue = this;
 
-      if (!this.projectName) {
-        this.showError("错误:未选择项目");
-        return;
-      }
-
-      return this.tcClient.getUnitsByRange(this.projectName, this.unitRangeStart, this.unitRangeEnd).then(
-          (list) => {
-            if (list) {
-              let hasConflict = false;
-              vue.conflictList = [];
-              list.forEach((unit) => {
-                const id = unit.id;
-                const unitPair = this.unitIndex[id] || (this.unitIndex[id] = {});
-                if (diffUnit(unitPair.prev, unit)) {
-                  if (!unitPair.next || unitPair.prev === unitPair.next ||
-                      !diffUnit(unitPair.prev, unitPair.next)) {
-                    unitPair.next = unit;
-                    unitPair.prev = unit;
-                  } else {
-                    if (diffUnit(unitPair.next, unit)) {
-                      hasConflict = true;
-                      vue.conflictList.push(unitPair);
+      if (this.isProjectOpen()) {
+        return this.tcClient.getUnitsByRange(this.projectName, this.unitRangeStart, this.unitRangeEnd).then(
+            (list) => {
+              if (list) {
+                let hasConflict = false;
+                vue.conflictList = [];
+                list.forEach((unit) => {
+                  const id = unit.id;
+                  const unitPair = this.unitIndex[id] || (this.unitIndex[id] = {});
+                  if (diffUnit(unitPair.prev, unit)) {
+                    if (!unitPair.next || unitPair.prev === unitPair.next ||
+                        !diffUnit(unitPair.prev, unitPair.next)) {
+                      unitPair.next = unit;
                       unitPair.prev = unit;
                     } else {
-                      unitPair.prev = unitPair.next;
+                      if (diffUnit(unitPair.next, unit)) {
+                        hasConflict = true;
+                        vue.conflictList.push(unitPair);
+                        unitPair.prev = unit;
+                      } else {
+                        unitPair.prev = unitPair.next;
+                      }
                     }
                   }
+                });
+                vue.hasConflict = hasConflict;
+                if (!hasConflict && vue.waitPush) {
+                  vue.onPush();
                 }
-              });
-              vue.hasConflict = hasConflict;
-              if (!hasConflict && vue.waitPush) {
-                vue.onPush();
+                vue.refreshView();
               }
-              vue.refreshView();
             }
-          }
-      );
+        );
+      }
     },
     onPush() {
-      if (!this.projectName) {
-        this.showError("错误:未选择项目");
-        return;
-      }
-
-      const unitPairs = [];
-      for (let i = this.unitRangeStart; i <= this.unitRangeEnd; i++) {
-        const unitPair = this.unitIndex[i];
-        if (unitPair) {
-          console.assert(unitPair.prev || unitPair.next);
-          if (!unitPair.next) {
-            unitPair.next = unitPair.prev;
-          } else if (unitPair.prev !== unitPair.next) {
-            unitPairs.push(unitPair);
-          }
-        }
-      }
-      return this.tcClient.postUnits(this.projectName, unitPairs.map((pair) => (pair.next))).then(
-          (result) => {
-            if (result) {
-              unitPairs.forEach((pair) => {
-                pair.prev = pair.next;
-              });
+      if (this.isProjectOpen()) {
+        const unitPairs = [];
+        for (let i = this.unitRangeStart; i <= this.unitRangeEnd; i++) {
+          const unitPair = this.unitIndex[i];
+          if (unitPair) {
+            console.assert(unitPair.prev || unitPair.next);
+            if (!unitPair.next) {
+              unitPair.next = unitPair.prev;
+            } else if (unitPair.prev !== unitPair.next) {
+              unitPairs.push(unitPair);
             }
           }
-      );
+        }
+        return this.tcClient.postUnits(this.projectName, unitPairs.map((pair) => (pair.next))).then(
+            (result) => {
+              if (result) {
+                unitPairs.forEach((pair) => {
+                  pair.prev = pair.next;
+                });
+              }
+            }
+        );
+      }
     },
     mergeConflict() {
       this.conflictList = [];
@@ -346,12 +407,40 @@ export default {
       localStorage.setItem("unitRangeEnd", this.unitRangeEnd);
       localStorage.setItem("viewRangeStart", this.viewRangeStart);
       localStorage.setItem("viewRangeLength", this.viewRangeLength);
+    },
+    isProjectOpen() {
+      if (!this.projectName) {
+        this.showError("错误:未选择项目");
+        return false;
+      }
+      return true;
+    },
+    prevPage() {
+      if (this.isProjectOpen()) {
+        this.viewRangeStart -= this.viewRangeLength;
+        this.refreshView();
+      }
+    },
+    nextPage() {
+      if (this.isProjectOpen()) {
+        this.viewRangeStart += this.viewRangeLength;
+        this.refreshView();
+      }
+    },
+    turnTo() {
+      if (this.isProjectOpen()) {
+        this.refreshView(); 
+      }
     }
   }
 };
 </script>
 
 <style>
+
+.button {
+    margin: 5px;
+  }
 
 .options {
   border: none;
@@ -376,4 +465,5 @@ export default {
   text-align: center;
   color: #2c3e50;
 }
+
 </style>
