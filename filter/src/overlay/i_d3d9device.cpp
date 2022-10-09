@@ -248,10 +248,6 @@ DWORD WINAPI DrawProc(LPVOID lpData) {
 }
 void IOverlayDevice::AttachSub(Subtitle *pSub_) {
   SIZE_T I;
-  if (!pSub_->Ready()) {
-    delete pSub_;
-    return;
-  }
   EnterCriticalSection(&SubSection);
   delete pSub;
   pSub = pSub_;

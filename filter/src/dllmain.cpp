@@ -492,7 +492,7 @@ void AttachImage() {
   DetourAttach(&((PVOID &)FileSys::pOpen), ToPtr(&FileSys::Open));
 }
 void DetachImage() {
-  DetourAttach(&((PVOID &)FileSys::pOpen), ToPtr(&FileSys::Open));
+  DetourDetach(&((PVOID &)FileSys::pOpen), ToPtr(&FileSys::Open));
 }
 
 void AttachSub() {
@@ -578,7 +578,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ulReason, LPVOID lpReserved) {
         if (!VMENV::pSubMap || !VMENV::pSubMap->Exist()) {
           MessageBoxW(GetDesktopWindow(), L"文本载入失败", L"错误",
                       MB_ICONSTOP);
-          ExitProcess(1);
+          return FALSE;
         }
       }
       if (doImagePatch) {

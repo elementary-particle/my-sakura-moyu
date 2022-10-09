@@ -377,6 +377,10 @@ class ID3DApp {
   };
   void AttachSub(Subtitle *pSub) {
     IOverlayD3D *iD3D;
+    if (!pSub->Ready()) {
+      delete pSub;
+      return;
+    }
     for (iD3D = pD3DList; iD3D; iD3D = iD3D->iNextD3D) {
       iD3D->AttachSub(pSub);
     }

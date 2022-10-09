@@ -90,13 +90,13 @@ Subtitle::Subtitle(char *pAssPath) {
   if (!pRenderer) {
     return;
   }
+  ass_set_fonts_dir(pAssLibrary, PATH_FONT);
+  ass_set_fonts(pRenderer, NULL, "sans-serif", ASS_FONTPROVIDER_DIRECTWRITE,
+                NULL, 1);
 }
 
 void Subtitle::Prepare(int FrameW, int FrameH) {
   SetFrameSize(FrameW, FrameH);
-  ass_set_fonts_dir(pAssLibrary, PATH_FONT);
-  ass_set_fonts(pRenderer, NULL, "sans-serif", ASS_FONTPROVIDER_DIRECTWRITE,
-                NULL, 1);
 }
 
 ASS_Image *Subtitle::Render(long long llTick) {
